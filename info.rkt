@@ -10,5 +10,7 @@
 (define build-deps
   '("rackunit-lib"
     "unstable-macro-testing-lib"
+    "scribble-lib"
+    "racket-doc"  
     ))
 
