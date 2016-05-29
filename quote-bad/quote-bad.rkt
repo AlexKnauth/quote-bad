@@ -143,8 +143,11 @@
     (define (pred e)
       (and (exn:fail? e)
            (< n (string-length (exn-message e)))
-           (string=? (substring (exn-message e) 0 n) msg)
-           (s-expr-matches? (read (open-input-string (substring (exn-message e) n))))))
+           (match (exn-message e)
+             [(regexp (regexp (string-append (regexp-quote msg) "(.*)$"))
+                      (list _ s-expr-string))
+              (s-expr-matches? (read (open-input-string s-expr-string)))]
+             [_ #false])))
     pred)
   (define-syntax-rule (expected-msg msg s-expr-pat)
     (expected-msg* msg (λ (v) (match v [s-expr-pat #true] [_ #false]))))
