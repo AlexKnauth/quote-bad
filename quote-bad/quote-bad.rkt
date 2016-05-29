@@ -45,6 +45,7 @@
   ;; atomic-literal-data? : Any -> Boolean
   (define (atomic-literal-data? stuff)
     (or (boolean? stuff)
+        (number? stuff)
         (string? stuff)
         (bytes? stuff)
         (keyword? stuff)
@@ -125,6 +126,8 @@
     (check-equal? 'def (string->symbol "def"))
     (check-equal? '#true #true)
     (check-equal? '#false #false)
+    (check-equal? '2 2)
+    (check-equal? '4.5 4.5)
     (check-equal? '"abc" "abc")
     (check-equal? '"def" "def")
     (check-equal? '#"abc" #"abc")
