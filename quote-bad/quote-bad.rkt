@@ -13,7 +13,7 @@
 (module+ test
   (require racket/match
            rackunit
-           syntax/macro-testing
+           (only-in unstable/macro-testing convert-compile-time-error)
            ))
 
 (begin-for-syntax
