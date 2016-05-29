@@ -1,8 +1,8 @@
 #lang racket/base
 
-(provide quote)
+(provide quote #%datum)
 
-(require (only-in racket/base [quote rkt:quote])
+(require (only-in racket/base [quote rkt:quote] [#%datum rkt:#%datum])
          (for-syntax racket/base
                      racket/list
                      racket/match
@@ -29,6 +29,23 @@
     ;; message : String
     (define message
       (format "Don't use quote for this. Instead you can use\n~a" translated-pretty))
+    (raise-syntax-error #f message stx))
+  ;; raise-self-quote-bad-error : Syntax Syntax -> Nothing
+  ;; Raises a syntax error explaining what to use instead of a self-quoting literal.
+  (define (raise-self-quote-bad-error stx stuff)
+    ;; translated-s-expr : S-Expr
+    (define translated-s-expr
+      (translate-quoted-s-expr stuff))
+    ;; translated-pretty : String
+    (define translated-pretty
+      (pretty-write-string translated-s-expr))
+    ;; message : String
+    (define message
+      (format (string-append
+               "Don't use self-quoting compound literals that implicitly quote sub-expressions.\n"
+               "Instead you can use\n"
+               "~a")
+              translated-pretty))
     (raise-syntax-error #f message stx))
   ;; translate-quoted-s-expr : Stx -> S-Expr
   (define (translate-quoted-s-expr stuff)
@@ -92,6 +109,17 @@
        (syntax/loc stx (rkt:quote simple))]
       [(quote stuff)
        (raise-quote-bad-error stx #'stuff)])))
+
+(define-syntax #%datum
+  (lambda (stx)
+    (syntax-parse stx
+      [(#%datum . id:id) ; for some reason (#%datum . id) expands (quote id)
+       (syntax/loc stx (rkt:#%datum . id))]
+      [(#%datum . simple)
+       #:when (atomic-literal-data? (syntax-e #'simple))
+       (syntax/loc stx (rkt:#%datum . simple))]
+      [(#%datum . stuff)
+       (raise-self-quote-bad-error stx #'stuff)])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
