@@ -10,6 +10,11 @@
                      racket/pretty
                      syntax/parse
                      ))
+(module+ test
+  (require racket/match
+           rackunit
+           syntax/macro-testing
+           ))
 
 (begin-for-syntax
   ;; raise-quote-bad-error : Syntax Syntax -> Nothing
@@ -28,7 +33,7 @@
   ;; translate-quoted-s-expr : Stx -> S-Expr
   (define (translate-quoted-s-expr stuff)
     (cond
-      [(syntax? stuff) (translate-quoted-s-expr (syntax-e stuff))]
+      [(syntax? stuff) (translate-quoted-s-expr (or (syntax->list stuff) (syntax-e stuff)))]
       [(symbol? stuff) (list 'quote stuff)] ; the one place this recommends quote
       [(atomic-literal-data? stuff) stuff]
       [(list? stuff) (list* 'list (map translate-quoted-s-expr stuff))]
@@ -87,3 +92,90 @@
       [(quote stuff)
        (raise-quote-bad-error stx #'stuff)])))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(module+ test
+  (define-syntax check-error
+    (lambda (stx)
+      (syntax-parse stx
+        [(check-stxerr exn-predicate expr)
+         (syntax/loc stx
+           (check-exn exn-predicate
+                      (λ () (convert-compile-time-error expr))))])))
+
+  (define-match-expander *q*
+    (lambda (stx)
+      (syntax-parse stx
+        [(*q* s-expr)
+         #'(== (rkt:quote s-expr))])))
+
+  (define (expected-msg* msg s-expr-matches?)
+    (define n (string-length msg))
+    (define (pred e)
+      (and (exn:fail? e)
+           (< n (string-length (exn-message e)))
+           (string=? (substring (exn-message e) 0 n) msg)
+           (s-expr-matches? (read (open-input-string (substring (exn-message e) n))))))
+    pred)
+  (define-syntax-rule (expected-msg msg s-expr-pat)
+    (expected-msg* msg (λ (v) (match v [s-expr-pat #true] [_ #false]))))
+
+  (test-case "okay uses of quote, with symbols and simple atomic literal data"
+    (check-equal? 'abc (string->symbol "abc"))
+    (check-equal? 'def (string->symbol "def"))
+    (check-equal? '#true #true)
+    (check-equal? '#false #false)
+    (check-equal? '"abc" "abc")
+    (check-equal? '"def" "def")
+    (check-equal? '#"abc" #"abc")
+    (check-equal? '#"def" #"def")
+    (check-equal? '#:abc (string->keyword "abc"))
+    (check-equal? '#:def (string->keyword "def"))
+    )
+
+  (test-case "bad uses of quote, with lists, vectors, and other compound literal data"
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (*q* (list)))
+                 '())
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (*q* (list 'a 'b 'c (list 'd) (list 'e (list 'f)) (list (list 'g)))))
+                 '(a b c (d) (e (f)) ((g))))
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (*q* (cons 'a 'b)))
+                 '(a . b))
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (*q* (list (cons 'a 'b) (cons 'c 'd) (cons 'e 'f))))
+                 '([a . b] [c . d] [e . f]))
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (*q* (list* 'a 'b 'c)))
+                 '(a b . c))
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (*q* (list 'a 'b 'c)))
+                 '(a b . (c)))
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (*q* (vector-immutable 'a 'b 'c (list 'd)
+                                       (vector-immutable 'e (list 'f))
+                                       (list (list 'g)))))
+                 '#(a b c (d) #(e (f)) ((g))))
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (or (*q* (hash 'a 'b 'c 'd 'e 'f))
+                      (*q* (hash 'a 'b 'e 'f 'c 'd))
+                      (*q* (hash 'c 'd 'a 'b 'e 'f))
+                      (*q* (hash 'c 'd 'e 'f 'a 'b))
+                      (*q* (hash 'e 'f 'a 'b 'c 'd))
+                      (*q* (hash 'e 'f 'c 'd 'a 'b))))
+                 '#hash([a . b] [c . d] [e . f]))
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
+                  (*q* (box-immutable 'a)))
+                 '#&a)
+    )
+  )
