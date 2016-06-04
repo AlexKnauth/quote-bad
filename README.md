@@ -25,18 +25,18 @@ Examples:
 > '#:of-course
 '#:of-course
 > '(1 2 (+ 1 2))
-. quote: Don't use quote for this. Instead you can use
-(list 1 2 (list '+ 1 2))
- in: (quote (1 2 (+ 1 2)))
+;. quote: Don't use quote for this. Instead you can use
+;(list 1 2 (list '+ 1 2))
+; in: (quote (1 2 (+ 1 2)))
 > (list 1 2 (list '+ 1 2))
 (list 1 2 (list '+ 1 2))
 > (list 1 2 (+ 1 2))
 (list 1 2 3)
 > #(1 2 (+ 1 2))
-. #%datum: Don't use self-quoting compound literals that implicitly quote sub-expressions.
-Instead you can use
-(vector-immutable 1 2 (list '+ 1 2))
- in: (#%datum . #(1 2 (+ 1 2)))
+;. #%datum: Don't use self-quoting compound literals that implicitly quote sub-expressions.
+;Instead you can use
+;(vector-immutable 1 2 (list '+ 1 2))
+; in: (#%datum . #(1 2 (+ 1 2)))
 > (vector-immutable 1 2 (list '+ 1 2))
 (vector-immutable 1 2 (list '+ 1 2))
 > (vector-immutable 1 2 (+ 1 2))
