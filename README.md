@@ -2,6 +2,8 @@ quote - bad [![Build Status](https://travis-ci.org/AlexKnauth/quote-bad.png?bran
 ===
 A version of quote that helps to rid programs of bad uses of quote.
 
+documentation: http://docs.racket-lang.org/quote-bad/index.html
+
 The `quote` form can seem convenient as a shorthand, but it can
 lead to many common mistakes. Most of these mistakes come from people
 not understanding that a quoted form also quotes its sub-expressions.
