@@ -5,6 +5,15 @@
                      quote-bad/quote-bad
                      ))
 
+@(define ev (make-base-eval))
+@(ev '(require mzlib/pconvert racket/pretty))
+@(ev '(current-print
+       (lambda (v)
+         (when (not (void? v))
+           (parameterize ([constructor-style-printing #true]
+                          [booleans-as-true/false #false])
+             (pretty-write (print-convert v)))))))
+
 @title{quote - bad}
 
 source code: @url{https://github.com/AlexKnauth/quote-bad}
@@ -21,7 +30,7 @@ write it without @racket[quote], and "self-quoting" compound data
 literals such as vector literals will display a similar error
 explaining how to write the same thing without them.
 
-@examples[
+@examples[#:eval ev
   (require quote-bad/quote-bad)
   'hello
   '"this is fine"
@@ -34,7 +43,9 @@ explaining how to write the same thing without them.
   (vector-immutable 1 2 (+ 1 2))
 ]
 
-Unfortunately, this doesn't do anything about printing (yet).
+Unfortunately, this doesn't do anything about printing (yet), so
+depending on your settings, values like lists, vectors, etc. could
+still print with @racket[quote].
 
 Note that this does not do anything to @racket[quasiquote], so if
 there any expressions that really do make sense as quoted, you can

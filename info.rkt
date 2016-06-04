@@ -11,6 +11,7 @@
   '("rackunit-lib"
     "unstable-macro-testing-lib"
     "scribble-lib"
-    "racket-doc"  
+    "racket-doc"
+    "pconvert-lib"
     ))
 
