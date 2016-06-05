@@ -6,13 +6,11 @@
                      ))
 
 @(define ev (make-base-eval))
-@(ev '(require mzlib/pconvert racket/pretty))
+@(ev '(require quote-bad/constructor-style-print/constructor-style-print))
 @(ev '(current-print
        (lambda (v)
          (when (not (void? v))
-           (parameterize ([constructor-style-printing #true]
-                          [booleans-as-true/false #false])
-             (pretty-write (print-convert v)))))))
+           (constructor-style-println v)))))
 
 @title{quote - bad}
 
