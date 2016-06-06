@@ -4,6 +4,7 @@
 
 (define deps
   '("base"
+    "pconvert-lib"
     "hygienic-quote-lang"
     ))
 
@@ -12,6 +13,5 @@
     "unstable-macro-testing-lib"
     "scribble-lib"
     "racket-doc"
-    "pconvert-lib"
     ))
 
