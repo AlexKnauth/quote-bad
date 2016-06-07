@@ -6,6 +6,7 @@
 
 (require racket/list
          racket/match
+         racket/set
          unstable/struct
          )
 (module+ test
@@ -20,8 +21,10 @@
     [(atomic-literal-data? stuff) stuff]
     [(list? stuff) (list* 'list (map translate-quoted-s-expr stuff))]
     [(cons? stuff) (translate-quoted-cons-s-expr stuff)]
+    [(mpair? stuff) (translate-quoted-mcons-s-expr stuff)]
     [(vector? stuff) (list* 'vector-immutable (map translate-quoted-s-expr (vector->list stuff)))]
     [(hash? stuff) (translate-quoted-hash-s-expr stuff)]
+    [(hash-set? stuff) (translate-quoted-hash-set-s-expr stuff)]
     [(box? stuff) (list 'box-immutable (translate-quoted-s-expr (unbox stuff)))]
     [(prefab-struct-key stuff) (translate-quoted-prefab-struct-s-expr stuff)]
     [else '....]))
@@ -30,6 +33,7 @@
 (define (atomic-literal-data? stuff)
   (or (boolean? stuff)
       (number? stuff)
+      (char? stuff)
       (symbol? stuff)
       (string? stuff)
       (bytes? stuff)
@@ -37,6 +41,10 @@
       (regexp? stuff)
       (byte-regexp? stuff)
       ))
+
+;; hash-set? : Any -> Boolean
+(define (hash-set? v)
+  (set? v))
 
 ;; translate-quoted-cons-s-expr : (Cons Stx Stx) -> S-Expr
 (define (translate-quoted-cons-s-expr stuff)
@@ -47,6 +55,11 @@
      (append (list 'list*)
              (map translate-quoted-s-expr as)
              (list (translate-quoted-s-expr b)))]))
+
+;; translate-quoted-mcons-s-expr : (MPairof Stx Stx) -> S-Expr
+(define (translate-quoted-mcons-s-expr stuff)
+  ;; no mlist, just nested mcons calls
+  (list 'mcons (translate-quoted-s-expr (mcar stuff)) (translate-quoted-s-expr (mcdr stuff))))
 
 ;; translate-quoted-hash-s-expr : (Hashof Stx Stx) -> S-Expr
 (define (translate-quoted-hash-s-expr stuff)
@@ -61,6 +74,18 @@
      (list* 'hasheqv hash-proc-args)]
     [(hash-eq? stuff)
      (list* 'hasheq hash-proc-args)]
+    [else '....]))
+
+;; translate-quoted-hash-set-s-expr : (Hash-Setof Stx) -> S-Expr
+(define (translate-quoted-hash-set-s-expr stuff)
+  (define set-proc-args (set->list stuff))
+  (cond
+    [(set-equal? stuff)
+     (list* 'set set-proc-args)]
+    [(set-eqv? stuff)
+     (list* 'seteqv set-proc-args)]
+    [(set-eq? stuff)
+     (list* 'seteq set-proc-args)]
     [else '....]))
 
 ;; translate-quoted-prefab-struct-s-expr : Prefab-Struct -> S-Expr
