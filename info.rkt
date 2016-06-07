@@ -5,6 +5,7 @@
 (define deps
   '("base"
     "pconvert-lib"
+    "unstable-lib"
     "hygienic-quote-lang"
     ))
 
