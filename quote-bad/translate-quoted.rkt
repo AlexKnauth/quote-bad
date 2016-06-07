@@ -6,6 +6,7 @@
 
 (require racket/list
          racket/match
+         unstable/struct
          )
 (module+ test
   (require rackunit))
@@ -22,6 +23,7 @@
     [(vector? stuff) (list* 'vector-immutable (map translate-quoted-s-expr (vector->list stuff)))]
     [(hash? stuff) (translate-quoted-hash-s-expr stuff)]
     [(box? stuff) (list 'box-immutable (translate-quoted-s-expr (unbox stuff)))]
+    [(prefab-struct-key stuff) (translate-quoted-prefab-struct-s-expr stuff)]
     [else '....]))
 
 ;; atomic-literal-data? : Any -> Boolean
@@ -61,6 +63,12 @@
      (list* 'hasheq hash-proc-args)]
     [else '....]))
 
+;; translate-quoted-prefab-struct-s-expr : Prefab-Struct -> S-Expr
+(define (translate-quoted-prefab-struct-s-expr stuff)
+  (list* 'make-prefab-struct
+         (translate-quoted-s-expr (prefab-struct-key stuff))
+         (map translate-quoted-s-expr (struct->list stuff))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (module+ test
@@ -98,5 +106,6 @@
                      '(hash 'e 'f 'a 'b 'c 'd)
                      '(hash 'e 'f 'c 'd 'a 'b)))
     (check-equal? (t '#&a) '(box-immutable 'a))
+    (check-equal? (t '#s(hello 1 2 3)) '(make-prefab-struct 'hello 1 2 3))
     )
   )
