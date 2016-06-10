@@ -22,7 +22,7 @@
     [(list? stuff) (list* 'list (map translate-quoted-s-expr stuff))]
     [(cons? stuff) (translate-quoted-cons-s-expr stuff)]
     [(mpair? stuff) (translate-quoted-mcons-s-expr stuff)]
-    [(vector? stuff) (list* 'vector-immutable (map translate-quoted-s-expr (vector->list stuff)))]
+    [(vector? stuff) (translate-quoted-vector-s-expr stuff)]
     [(hash? stuff) (translate-quoted-hash-s-expr stuff)]
     [(hash-set? stuff) (translate-quoted-hash-set-s-expr stuff)]
     [(box? stuff) (list 'box-immutable (translate-quoted-s-expr (unbox stuff)))]
@@ -60,6 +60,14 @@
 (define (translate-quoted-mcons-s-expr stuff)
   ;; no mlist, just nested mcons calls
   (list 'mcons (translate-quoted-s-expr (mcar stuff)) (translate-quoted-s-expr (mcdr stuff))))
+
+;; translate-quoted-vector-s-expr : (Vectorof Stx) -> S-Expr
+(define (translate-quoted-vector-s-expr stuff)
+  (define vector-proc-args (map translate-quoted-s-expr (vector->list stuff)))
+  (cond [(immutable? stuff)
+         (list* 'vector-immutable vector-proc-args)]
+        [else
+         (list* 'vector vector-proc-args)]))
 
 ;; translate-quoted-hash-s-expr : (Hashof Stx Stx) -> S-Expr
 (define (translate-quoted-hash-s-expr stuff)
