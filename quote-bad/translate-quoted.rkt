@@ -71,6 +71,15 @@
 
 ;; translate-quoted-hash-s-expr : (Hashof Stx Stx) -> S-Expr
 (define (translate-quoted-hash-s-expr stuff)
+  (cond [(immutable? stuff)
+         (translate-quoted-immutable-hash-s-expr stuff)]
+        [(hash-weak? stuff)
+         (translate-quoted-weak-hash-s-expr stuff)]
+        [else
+         (translate-quoted-mutable-hash-s-expr stuff)]))
+
+;; translate-quoted-immutable-hash-s-expr : (Immutable-Hashof Stx Stx) -> S-Expr
+(define (translate-quoted-immutable-hash-s-expr stuff)
   (define hash-proc-args
     (append* (for/list ([(k v) (in-hash stuff)])
                (list (translate-quoted-s-expr k)
@@ -83,6 +92,14 @@
     [(hash-eq? stuff)
      (list* 'hasheq hash-proc-args)]
     [else '....]))
+
+;; translate-quoted-mutable-hash-s-expr : (Mutable-Hashof Stx Stx) -> S-Expr
+(define (translate-quoted-mutable-hash-s-expr stuff)
+  (list 'make-hash '....))
+
+;; translate-quoted-weak-hash-s-expr : (Weak-Hashof Stx Stx) -> S-Expr
+(define (translate-quoted-weak-hash-s-expr stuff)
+  (list 'make-weak-hash '....))
 
 ;; translate-quoted-hash-set-s-expr : (Hash-Setof Stx) -> S-Expr
 (define (translate-quoted-hash-set-s-expr stuff)
