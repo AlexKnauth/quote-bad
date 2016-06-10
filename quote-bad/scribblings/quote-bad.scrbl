@@ -19,6 +19,8 @@
 
 source code: @url{https://github.com/AlexKnauth/quote-bad}
 
+@local-table-of-contents[]
+
 @section{Replacing bad uses of quote in programs}
 
 @defmodule[quote-bad/quote-bad]{
@@ -69,7 +71,7 @@ it displays an error message explaining how to write the expression
 without using self-quoting literals.
 }
 
-@section{Changing the printing style to avoid bad uses of quote}
+@section{Changing the printing style to avoid printing bad uses of quote}
 
 @defmodule[quote-bad/constructor-style-print #:lang]{
 
