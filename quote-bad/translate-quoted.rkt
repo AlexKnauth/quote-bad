@@ -103,6 +103,17 @@
 
 ;; translate-quoted-hash-set-s-expr : (Hash-Setof Stx) -> S-Expr
 (define (translate-quoted-hash-set-s-expr stuff)
+  (cond
+    [(set? stuff)
+     (translate-quoted-immutable-hash-set-s-expr stuff)]
+    [(set-mutable? stuff)
+     (translate-quoted-mutable-hash-set-s-expr stuff)]
+    [(set-weak? stuff)
+     (translate-quoted-weak-hash-set-s-expr stuff)]
+    [else '....]))
+
+;; translate-quoted-immutable-hash-set-s-expr : (Immutable-Hash-Setof Stx) -> S-Expr
+(define (translate-quoted-immutable-hash-set-s-expr stuff)
   (define set-proc-args (set->list stuff))
   (cond
     [(set-equal? stuff)
@@ -112,6 +123,14 @@
     [(set-eq? stuff)
      (list* 'seteq set-proc-args)]
     [else '....]))
+
+;; translate-quoted-mutable-hash-set-s-expr : (Mutable-Hash-Setof Stx) -> S-Expr
+(define (translate-quoted-mutable-hash-set-s-expr stuff)
+  (list 'mutable-set '....))
+
+;; translate-quoted-weak-hash-set-s-expr : (Weak-Hash-Setof Stx) -> S-Expr
+(define (translate-quoted-weak-hash-set-s-expr stuff)
+  (list 'weak-set '....))
 
 ;; translate-quoted-prefab-struct-s-expr : Prefab-Struct -> S-Expr
 (define (translate-quoted-prefab-struct-s-expr stuff)
