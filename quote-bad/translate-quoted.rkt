@@ -25,7 +25,7 @@
     [(vector? stuff) (translate-quoted-vector-s-expr stuff)]
     [(hash? stuff) (translate-quoted-hash-s-expr stuff)]
     [(hash-set? stuff) (translate-quoted-hash-set-s-expr stuff)]
-    [(box? stuff) (list 'box-immutable (translate-quoted-s-expr (unbox stuff)))]
+    [(box? stuff) (translate-quoted-box-s-expr stuff)]
     [(prefab-struct-key stuff) (translate-quoted-prefab-struct-s-expr stuff)]
     [else '....]))
 
@@ -131,6 +131,13 @@
 ;; translate-quoted-weak-hash-set-s-expr : (Weak-Hash-Setof Stx) -> S-Expr
 (define (translate-quoted-weak-hash-set-s-expr stuff)
   (list 'weak-set '....))
+
+;; translate-quoted-box-s-expr : (Boxof Stx) -> S-Expr
+(define (translate-quoted-box-s-expr stuff)
+  (cond [#true ;(immutable? stuff) ; Box literals should be immutable once expanded
+         (list 'box-immutable (translate-quoted-s-expr (unbox stuff)))]
+        [else
+         (list 'box (translate-quoted-s-expr (unbox stuff)))]))
 
 ;; translate-quoted-prefab-struct-s-expr : Prefab-Struct -> S-Expr
 (define (translate-quoted-prefab-struct-s-expr stuff)
