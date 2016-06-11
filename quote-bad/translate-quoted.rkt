@@ -64,7 +64,7 @@
 ;; translate-quoted-vector-s-expr : (Vectorof Stx) -> S-Expr
 (define (translate-quoted-vector-s-expr stuff)
   (define vector-proc-args (map translate-quoted-s-expr (vector->list stuff)))
-  (cond [(immutable? stuff)
+  (cond [#true ;(immutable? stuff) ; Vector literals should be immutable once expanded
          (list* 'vector-immutable vector-proc-args)]
         [else
          (list* 'vector vector-proc-args)]))
