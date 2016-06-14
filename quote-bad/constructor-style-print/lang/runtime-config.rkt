@@ -2,7 +2,9 @@
 
 (provide configure)
 
-(require "../constructor-style-print.rkt")
+(require mzlib/pconvert-prop
+         "../constructor-style-print.rkt"
+         )
 
 (define (configure data)
   (define orig-port-print-handler (global-port-print-handler))
@@ -12,4 +14,16 @@
     (parameterize ([global-port-print-handler orig-port-print-handler])
       (constructor-style-print v out qdepth)))
   (global-port-print-handler constructor-style-port-print-handler))
+
+
+
+;; A struct for wrapping values that are printed as an s-expression or
+;; other value is written
+(struct written (v)
+  #:methods gen:custom-write
+  [(define (write-proc this out mode)
+     (write (written-v this) out))]
+  #:property prop:print-converter
+  (lambda (this recur)
+    (written-v this)))
 
