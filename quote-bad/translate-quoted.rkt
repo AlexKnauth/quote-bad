@@ -44,7 +44,10 @@
 
 ;; hash-set? : Any -> Boolean
 (define (hash-set? v)
-  (set? v))
+  (or (set? v) ; only immutable
+      (set-mutable? v) ; only non-weak-mutable
+      (set-weak? v) ; only weak-mutable
+      ))
 
 ;; translate-quoted-cons-s-expr : (Cons Stx Stx) -> S-Expr
 (define (translate-quoted-cons-s-expr stuff)
