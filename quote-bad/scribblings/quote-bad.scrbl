@@ -8,11 +8,8 @@
 
 @(define (make-ev)
    (define ev (make-base-eval))
-   (ev '(require quote-bad/constructor-style-print/constructor-style-print))
-   (ev '(current-print
-         (lambda (v)
-           (when (not (void? v))
-             (constructor-style-println v)))))
+   (ev '(require quote-bad/constructor-style-print/lang/runtime-config))
+   (ev '(configure #f))
    ev)
 
 @title{quote - bad}
