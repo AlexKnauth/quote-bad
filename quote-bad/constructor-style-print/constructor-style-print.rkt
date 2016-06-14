@@ -2,6 +2,7 @@
 
 (provide constructor-style-print
          constructor-style-println
+         print-convert/constructor-style
          )
 
 (require mzlib/pconvert
@@ -10,22 +11,24 @@
 (module+ test
   (require racket/port rackunit))
 
+;; print-convert/constructor-style : Any -> Any
+(define (print-convert/constructor-style v)
+  (parameterize ([constructor-style-printing #true]
+                 [booleans-as-true/false #false])
+    (print-convert v)))
+
 ;; constructor-style-print : Any [Output-Port] [(U 0 1)] -> Void
 ;; Prints v using constructor-style printing (without pretty-printing).
 (define (constructor-style-print v [out (current-output-port)] [qdepth 0])
-  (parameterize ([constructor-style-printing #true]
-                 [booleans-as-true/false #false]
-                 [print-reader-abbreviations #true])
-    (write (print-convert v) out)))
+  (parameterize ([print-reader-abbreviations #true])
+    (write (print-convert/constructor-style v) out)))
 
 ;; constructor-style-println : Any [Output-Port] [(U 0 1)] -> Void
 ;; Prints v followed by a newline, using constructor-style pretty printing.
 (define (constructor-style-println v [out (current-output-port)] [qdepth 0])
-  (parameterize ([constructor-style-printing #true]
-                 [booleans-as-true/false #false]
-                 [print-reader-abbreviations #true]
+  (parameterize ([print-reader-abbreviations #true]
                  [pretty-print-abbreviate-read-macros #true])
-    (pretty-write (print-convert v) out)))
+    (pretty-write (print-convert/constructor-style v) out)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
