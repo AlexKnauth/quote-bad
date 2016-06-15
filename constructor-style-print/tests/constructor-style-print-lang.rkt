@@ -1,9 +1,9 @@
-#lang quote-bad/constructor-style-print racket/base
+#lang constructor-style-print racket/base
 
 ;; Because of how raco test works, this file's test module isn't run
 ;; as if this file were the main file, so this explicit runtime-config
 ;; setup is necessary.
-(require "../constructor-style-print/lang/runtime-config.rkt")
+(require constructor-style-print/lang/runtime-config)
 (configure #f)
 
 (module+ test
