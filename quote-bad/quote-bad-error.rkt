@@ -14,7 +14,7 @@
 (define (raise-quote-bad-error stx stuff)
   ;; translated-s-expr : S-Expr
   (define translated-s-expr
-    (translate-quoted-s-expr stuff))
+    (translate-quoted stuff))
   ;; translated-pretty : String
   (define translated-pretty
     (pretty-write-string translated-s-expr))
@@ -28,7 +28,7 @@
 (define (raise-self-quote-bad-error stx stuff)
   ;; translated-s-expr : S-Expr
   (define translated-s-expr
-    (translate-quoted-s-expr stuff))
+    (translate-quoted stuff))
   ;; translated-pretty : String
   (define translated-pretty
     (pretty-write-string translated-s-expr))

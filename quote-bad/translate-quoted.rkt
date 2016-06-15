@@ -1,6 +1,6 @@
 #lang racket/base
 
-(provide translate-quoted-s-expr
+(provide translate-quoted
          atomic-literal-data?
          )
 
@@ -12,21 +12,21 @@
 (module+ test
   (require rackunit))
 
-;; translate-quoted-s-expr : Stx -> S-Expr
-(define (translate-quoted-s-expr stuff)
+;; translate-quoted : Stx -> S-Expr
+(define (translate-quoted stuff)
   (cond
-    [(syntax? stuff) (translate-quoted-s-expr (or (syntax->list stuff) (syntax-e stuff)))]
+    [(syntax? stuff) (translate-quoted (or (syntax->list stuff) (syntax-e stuff)))]
     [(symbol? stuff) (list 'quote stuff)] ; the two places this recommends quote
     [(keyword? stuff) (list 'quote stuff)]
     [(atomic-literal-data? stuff) stuff]
-    [(list? stuff) (list* 'list (map translate-quoted-s-expr stuff))]
-    [(cons? stuff) (translate-quoted-cons-s-expr stuff)]
-    [(mpair? stuff) (translate-quoted-mcons-s-expr stuff)]
-    [(vector? stuff) (translate-quoted-vector-s-expr stuff)]
-    [(hash? stuff) (translate-quoted-hash-s-expr stuff)]
-    [(hash-set? stuff) (translate-quoted-hash-set-s-expr stuff)]
-    [(box? stuff) (translate-quoted-box-s-expr stuff)]
-    [(prefab-struct-key stuff) (translate-quoted-prefab-struct-s-expr stuff)]
+    [(list? stuff) (list* 'list (map translate-quoted stuff))]
+    [(cons? stuff) (translate-quoted/cons stuff)]
+    [(mpair? stuff) (translate-quoted/mcons stuff)]
+    [(vector? stuff) (translate-quoted/vector stuff)]
+    [(hash? stuff) (translate-quoted/hash stuff)]
+    [(hash-set? stuff) (translate-quoted/hash-set stuff)]
+    [(box? stuff) (translate-quoted/box stuff)]
+    [(prefab-struct-key stuff) (translate-quoted/prefab-struct stuff)]
     [else '....]))
 
 ;; atomic-literal-data? : Any -> Boolean
@@ -50,30 +50,30 @@
       ))
 
 ;; translate-quoted-cons-s-expr : (Cons Stx Stx) -> S-Expr
-(define (translate-quoted-cons-s-expr stuff)
+(define (translate-quoted/cons stuff)
   (match stuff
     [(cons a (and b (not (? cons?))))
-     (list 'cons (translate-quoted-s-expr a) (translate-quoted-s-expr b))]
+     (list 'cons (translate-quoted a) (translate-quoted b))]
     [(list-rest as ... (and b (not (? cons?))))
      (append (list 'list*)
-             (map translate-quoted-s-expr as)
-             (list (translate-quoted-s-expr b)))]))
+             (map translate-quoted as)
+             (list (translate-quoted b)))]))
 
 ;; translate-quoted-mcons-s-expr : (MPairof Stx Stx) -> S-Expr
-(define (translate-quoted-mcons-s-expr stuff)
+(define (translate-quoted/mcons stuff)
   ;; no mlist, just nested mcons calls
-  (list 'mcons (translate-quoted-s-expr (mcar stuff)) (translate-quoted-s-expr (mcdr stuff))))
+  (list 'mcons (translate-quoted (mcar stuff)) (translate-quoted (mcdr stuff))))
 
 ;; translate-quoted-vector-s-expr : (Vectorof Stx) -> S-Expr
-(define (translate-quoted-vector-s-expr stuff)
-  (define vector-proc-args (map translate-quoted-s-expr (vector->list stuff)))
+(define (translate-quoted/vector stuff)
+  (define vector-proc-args (map translate-quoted (vector->list stuff)))
   (cond [#true ;(immutable? stuff) ; Vector literals should be immutable once expanded
          (list* 'vector-immutable vector-proc-args)]
         [else
          (list* 'vector vector-proc-args)]))
 
 ;; translate-quoted-hash-s-expr : (Hashof Stx Stx) -> S-Expr
-(define (translate-quoted-hash-s-expr stuff)
+(define (translate-quoted/hash stuff)
   (cond [(immutable? stuff)
          (translate-quoted-immutable-hash-s-expr stuff)]
         [(hash-weak? stuff)
@@ -85,8 +85,8 @@
 (define (translate-quoted-immutable-hash-s-expr stuff)
   (define hash-proc-args
     (append* (for/list ([(k v) (in-hash stuff)])
-               (list (translate-quoted-s-expr k)
-                     (translate-quoted-s-expr v)))))
+               (list (translate-quoted k)
+                     (translate-quoted v)))))
   (cond
     [(hash-equal? stuff)
      (list* 'hash hash-proc-args)]
@@ -105,7 +105,7 @@
   (list 'make-weak-hash '....))
 
 ;; translate-quoted-hash-set-s-expr : (Hash-Setof Stx) -> S-Expr
-(define (translate-quoted-hash-set-s-expr stuff)
+(define (translate-quoted/hash-set stuff)
   (cond
     [(set? stuff)
      (translate-quoted-immutable-hash-set-s-expr stuff)]
@@ -136,22 +136,22 @@
   (list 'weak-set '....))
 
 ;; translate-quoted-box-s-expr : (Boxof Stx) -> S-Expr
-(define (translate-quoted-box-s-expr stuff)
+(define (translate-quoted/box stuff)
   (cond [#true ;(immutable? stuff) ; Box literals should be immutable once expanded
-         (list 'box-immutable (translate-quoted-s-expr (unbox stuff)))]
+         (list 'box-immutable (translate-quoted (unbox stuff)))]
         [else
-         (list 'box (translate-quoted-s-expr (unbox stuff)))]))
+         (list 'box (translate-quoted (unbox stuff)))]))
 
 ;; translate-quoted-prefab-struct-s-expr : Prefab-Struct -> S-Expr
-(define (translate-quoted-prefab-struct-s-expr stuff)
+(define (translate-quoted/prefab-struct stuff)
   (list* 'make-prefab-struct
-         (translate-quoted-s-expr (prefab-struct-key stuff))
-         (map translate-quoted-s-expr (struct->list stuff))))
+         (translate-quoted (prefab-struct-key stuff))
+         (map translate-quoted (struct->list stuff))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (module+ test
-  (define t translate-quoted-s-expr)
+  (define t translate-quoted)
 
   (test-case "simple atomic data"
     (check-equal? (t 'abc) ''abc)
