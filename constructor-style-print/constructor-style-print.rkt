@@ -33,17 +33,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (module+ test
-  (define (str v)
-    (call-with-output-string
-     (λ (out) (constructor-style-print v out))))
-  (define (strln v)
-    (call-with-output-string
-     (λ (out) (constructor-style-println v out))))
-
-  (check-equal? (str (list 1 2 3)) "(list 1 2 3)")
-  (check-equal? (strln (list 1 2 3)) "(list 1 2 3)\n")
-  (check-equal? (str (vector-immutable 1 2 3)) "(vector-immutable 1 2 3)")
-  (check-equal? (strln (vector-immutable 1 2 3)) "(vector-immutable 1 2 3)\n")
-  (check-equal? (str (list 'a 'b 'c)) "(list 'a 'b 'c)")
-  (check-equal? (strln (list 'a 'b 'c)) "(list 'a 'b 'c)\n")
+  (test-case "constructor-style-print"
+    (define (str v)
+      (call-with-output-string
+       (λ (out) (constructor-style-print v out))))
+    (define (strln v)
+      (call-with-output-string
+       (λ (out) (constructor-style-println v out))))
+    
+    (check-equal? (str (list 1 2 3)) "(list 1 2 3)")
+    (check-equal? (strln (list 1 2 3)) "(list 1 2 3)\n")
+    (check-equal? (str (vector-immutable 1 2 3)) "(vector-immutable 1 2 3)")
+    (check-equal? (strln (vector-immutable 1 2 3)) "(vector-immutable 1 2 3)\n")
+    (check-equal? (str (list 'a 'b 'c)) "(list 'a 'b 'c)")
+    (check-equal? (strln (list 'a 'b 'c)) "(list 'a 'b 'c)\n")
+    )
   )
