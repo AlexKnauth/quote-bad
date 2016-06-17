@@ -9,7 +9,7 @@
          racket/pretty
          )
 (module+ test
-  (require racket/port rackunit))
+  (require racket/port rackunit version/utils))
 
 ;; print-convert/constructor-style : Any -> Any
 (define (print-convert/constructor-style v)
@@ -72,10 +72,11 @@
                     '(list (cons 'a 'b) (cons 'c 'd) (cons 'e 'f)))
       (check-equal? (s (list* 'a 'b 'c)) '(cons 'a (cons 'b 'c)))
       (check-equal? (s (vector-immutable 'a 'b 'c)) '(vector-immutable 'a 'b 'c))
-      (check-match (s (hash 'a 'b 'c 'd 'e 'f))
-                   `(make-immutable-hash
-                     (list
-                      ,@(list-no-order '(cons 'a 'b) '(cons 'c 'd) '(cons 'e 'f)))))
+      (when (version<=? "6.3" (version)) ; there was a bug in print-convert for versions below this
+        (check-match (s (hash 'a 'b 'c 'd 'e 'f))
+                     `(make-immutable-hash
+                       (list
+                        ,@(list-no-order '(cons 'a 'b) '(cons 'c 'd) '(cons 'e 'f))))))
       (check-equal? (s (box-immutable 'a)) '(box-immutable 'a))
       (check-equal? (s (make-prefab-struct 'hello 1 2 3)) '(make-prefab-struct 'hello 1 2 3))
       )
