@@ -78,7 +78,9 @@
                        (list
                         ,@(list-no-order '(cons 'a 'b) '(cons 'c 'd) '(cons 'e 'f))))))
       (check-equal? (s (box-immutable 'a)) '(box-immutable 'a))
-      (check-equal? (s (make-prefab-struct 'hello 1 2 3)) '(make-prefab-struct 'hello 1 2 3))
+      (check-match (s (make-prefab-struct 'hello 1 2 3))
+                   (or '(make-prefab-struct 'hello 1 2 3)
+                       '(hello 1 2 3)))
       )
     )
   )
