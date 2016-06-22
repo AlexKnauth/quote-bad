@@ -72,7 +72,7 @@ without using self-quoting literals.
 
 @defmodule[constructor-style-print #:lang]{
 
-A meta-language like @racket[at-exp] that changes the printing style
+A lang-extension like @racket[at-exp] that changes the printing style
 for programs that use it in the main file. The lang line @hash-lang[]
 @racketmodname[constructor-style-print] @racketmodname[racket]
 declares a language like @racketmodname[racket], except that values
