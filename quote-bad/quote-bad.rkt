@@ -130,6 +130,15 @@
                  '#hash([a . b] [c . d] [e . f]))
     (check-error (expected-msg
                   "quote: Don't use quote for this. Instead you can use"
+                  (or (*q* (hashalw 'a 'b 'c 'd 'e 'f))
+                      (*q* (hashalw 'a 'b 'e 'f 'c 'd))
+                      (*q* (hashalw 'c 'd 'a 'b 'e 'f))
+                      (*q* (hashalw 'c 'd 'e 'f 'a 'b))
+                      (*q* (hashalw 'e 'f 'a 'b 'c 'd))
+                      (*q* (hashalw 'e 'f 'c 'd 'a 'b))))
+                 '#hashalw([a . b] [c . d] [e . f]))
+    (check-error (expected-msg
+                  "quote: Don't use quote for this. Instead you can use"
                   (*q* (box-immutable 'a)))
                  '#&a)
     )

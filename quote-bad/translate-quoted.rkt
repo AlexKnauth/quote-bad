@@ -90,6 +90,8 @@
   (cond
     [(hash-equal? stuff)
      (list* 'hash hash-proc-args)]
+    [(hash-equal-always? stuff)
+     (list* 'hashalw hash-proc-args)]
     [(hash-eqv? stuff)
      (list* 'hasheqv hash-proc-args)]
     [(hash-eq? stuff)
@@ -121,6 +123,8 @@
   (cond
     [(set-equal? stuff)
      (list* 'set set-proc-args)]
+    [(set-equal-always? stuff)
+     (list* 'setalw set-proc-args)]
     [(set-eqv? stuff)
      (list* 'seteqv set-proc-args)]
     [(set-eq? stuff)
@@ -184,6 +188,13 @@
                      '(hash 'c 'd 'e 'f 'a 'b)
                      '(hash 'e 'f 'a 'b 'c 'd)
                      '(hash 'e 'f 'c 'd 'a 'b)))
+    (check-match (t '#hashalw([a . b] [c . d] [e . f]))
+                 (or '(hashalw 'a 'b 'c 'd 'e 'f)
+                     '(hashalw 'a 'b 'e 'f 'c 'd)
+                     '(hashalw 'c 'd 'a 'b 'e 'f)
+                     '(hashalw 'c 'd 'e 'f 'a 'b)
+                     '(hashalw 'e 'f 'a 'b 'c 'd)
+                     '(hashalw 'e 'f 'c 'd 'a 'b)))
     (check-equal? (t '#&a) '(box-immutable 'a))
     (check-equal? (t '#s(hello 1 2 3)) '(make-prefab-struct 'hello 1 2 3))
     )
