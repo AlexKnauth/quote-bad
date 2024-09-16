@@ -1,4 +1,4 @@
-quote - bad [![Build Status](https://travis-ci.org/AlexKnauth/quote-bad.png?branch=master)](https://travis-ci.org/AlexKnauth/quote-bad)
+quote - bad
 ===
 A version of quote that helps to rid programs of bad uses of quote.
 
