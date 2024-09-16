@@ -16,3 +16,8 @@
     "racket-doc"
     ))
 
+(define pkg-desc "A version of quote that helps to rid programs of bad uses of quote")
+
+(define version "0.0")
+
+(define license 'MIT)
